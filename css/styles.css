@@ -855,3 +855,44 @@ body {
 html {
     scroll-behavior: smooth;
 }
+
+/* Chatbot Customization */
+iframe[src*="chatbase.co"] {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Chatbot button customization */
+div[id*="chatbase-bubble"] {
+    background: var(--gradient-primary) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[id*="chatbase-bubble"]:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4) !important;
+}
+
+/* Ensure chatbot is visible on all backgrounds */
+div[id*="chatbase"] {
+    z-index: 9999 !important;
+}
+
+/* Custom positioning for mobile */
+@media (max-width: 768px) {
+    div[id*="chatbase-bubble"] {
+        bottom: 20px !important;
+        right: 20px !important;
+        width: 56px !important;
+        height: 56px !important;
+    }
+    
+    iframe[src*="chatbase.co"] {
+        bottom: 80px !important;
+        right: 10px !important;
+        width: calc(100vw - 20px) !important;
+        max-width: 400px !important;
+    }
+}
