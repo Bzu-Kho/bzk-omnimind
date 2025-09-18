@@ -324,3 +324,109 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+
+// Cookie Consent Management
+document.addEventListener('DOMContentLoaded', function() {
+    const cookieBanner = document.getElementById('cookie-banner');
+    const acceptBtn = document.getElementById('accept-cookies');
+    const rejectBtn = document.getElementById('reject-cookies');
+    const closeBtn = document.getElementById('close-cookie-banner');
+    const privacyLink = document.querySelector('.privacy-link');
+    const privacyModal = document.getElementById('privacy-modal');
+    const closePrivacy = document.getElementById('close-privacy');
+    
+    // Check if user has already made a choice
+    const cookieConsent = localStorage.getItem('cookie-consent');
+    
+    // Show banner if no previous consent
+    if (!cookieConsent) {
+        setTimeout(() => {
+            cookieBanner.classList.add('show');
+        }, 1000); // Show after 1 second
+    }
+    
+    // Accept all cookies
+    acceptBtn.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'accepted');
+        localStorage.setItem('cookie-timestamp', new Date().toISOString());
+        hideBanner();
+        
+        // Enable analytics/tracking cookies here
+        enableAnalytics();
+    });
+    
+    // Reject non-essential cookies
+    rejectBtn.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'rejected');
+        localStorage.setItem('cookie-timestamp', new Date().toISOString());
+        hideBanner();
+        
+        // Only essential cookies enabled
+        console.log('Only essential cookies enabled');
+    });
+    
+    // Close banner (same as reject)
+    closeBtn.addEventListener('click', function() {
+        localStorage.setItem('cookie-consent', 'dismissed');
+        localStorage.setItem('cookie-timestamp', new Date().toISOString());
+        hideBanner();
+    });
+    
+    // Open privacy policy modal
+    privacyLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        privacyModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    });
+    
+    // Close privacy policy modal
+    closePrivacy.addEventListener('click', function() {
+        privacyModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    });
+    
+    // Close modal when clicking outside
+    privacyModal.addEventListener('click', function(e) {
+        if (e.target === privacyModal) {
+            privacyModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    });
+    
+    function hideBanner() {
+        cookieBanner.classList.remove('show');
+        setTimeout(() => {
+            cookieBanner.style.display = 'none';
+        }, 300);
+    }
+    
+    function enableAnalytics() {
+        // Here you would enable Google Analytics, Facebook Pixel, etc.
+        console.log('Analytics enabled - Ready for Google Analytics integration');
+        
+        // Example: Google Analytics
+        // gtag('config', 'GA_MEASUREMENT_ID');
+        
+        // Example: Facebook Pixel
+        // fbq('track', 'PageView');
+    }
+    
+    // Check if consent needs renewal (every 6 months)
+    if (cookieConsent) {
+        const consentDate = localStorage.getItem('cookie-timestamp');
+        if (consentDate) {
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            if (new Date(consentDate) < sixMonthsAgo) {
+                // Consent is old, show banner again
+                localStorage.removeItem('cookie-consent');
+                localStorage.removeItem('cookie-timestamp');
+                setTimeout(() => {
+                    cookieBanner.style.display = 'block';
+                    cookieBanner.classList.add('show');
+                }, 1000);
+            }
+        }
+    }
+});

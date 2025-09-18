@@ -926,3 +926,255 @@ div[id*="chatbase"]:not([id*="bubble"]) {
         right: 10px !important;
     }
 }
+
+/* Cookie Consent Banner */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(31, 41, 55, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 20px;
+    z-index: 10000;
+    border-top: 3px solid var(--primary-color);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.cookie-banner.show {
+    transform: translateY(0);
+}
+
+.cookie-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.cookie-message h3 {
+    color: var(--primary-color);
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.cookie-message p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #e5e7eb;
+}
+
+.cookie-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.btn-accept {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-accept:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+.btn-reject {
+    background: transparent;
+    color: #e5e7eb;
+    border: 2px solid #6b7280;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-reject:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.privacy-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s ease;
+}
+
+.privacy-link:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.cookie-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    line-height: 1;
+}
+
+.cookie-close:hover {
+    color: white;
+}
+
+/* Mobile responsive for cookies */
+@media (max-width: 768px) {
+    .cookie-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .cookie-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .btn-accept,
+    .btn-reject {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    .cookie-close {
+        top: 10px;
+        right: 15px;
+    }
+}
+
+/* Privacy Policy Modal */
+.privacy-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10001;
+    overflow-y: auto;
+}
+
+.privacy-modal.show {
+    display: block;
+}
+
+.privacy-content {
+    background: white;
+    margin: 50px auto;
+    padding: 0;
+    border-radius: 12px;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.privacy-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.privacy-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-privacy {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: opacity 0.3s ease;
+}
+
+.close-privacy:hover {
+    opacity: 0.7;
+}
+
+.privacy-body {
+    padding: 30px;
+    max-height: calc(90vh - 80px);
+    overflow-y: auto;
+}
+
+.privacy-body section {
+    margin-bottom: 25px;
+}
+
+.privacy-body h3 {
+    color: var(--primary-color);
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+}
+
+.privacy-body p {
+    margin: 0 0 15px 0;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+.privacy-body ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.privacy-body li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.privacy-body strong {
+    color: var(--primary-color);
+}
+
+/* Mobile responsive for privacy modal */
+@media (max-width: 768px) {
+    .privacy-content {
+        margin: 20px;
+        max-height: calc(100vh - 40px);
+    }
+    
+    .privacy-header {
+        padding: 15px 20px;
+    }
+    
+    .privacy-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .privacy-body {
+        padding: 20px;
+    }
+}
