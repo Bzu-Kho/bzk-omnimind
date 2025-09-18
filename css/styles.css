@@ -5,6 +5,17 @@
     box-sizing: border-box;
 }
 
+/* Fuentes Cósmicas y Rúnicas */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cinzel:wght@400;600&display=swap');
+
+/* Fuente Rúnica Elder Futhark para títulos místicos */
+@font-face {
+    font-family: 'RunicFont';
+    src: url('data:text/css;charset=utf-8;base64,') format('truetype');
+    unicode-range: U+16A0-16FF; /* Runic Unicode Range */
+    font-display: swap;
+}
+
 :root {
     --primary-color: #2563eb;
     --secondary-color: #1e40af;
@@ -25,6 +36,22 @@ body {
     color: var(--text-color);
     background-color: var(--bg-color);
     position: relative;
+}
+
+/* Metatron's Cube & Pyramid Sacred Geometry for White Spaces */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><pattern id="metatronPattern" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse"><g transform="translate(150,150)" opacity="0.03"><circle cx="0" cy="0" r="80" fill="none" stroke="%23007755" stroke-width="1"/><circle cx="0" cy="0" r="40" fill="none" stroke="%23005533" stroke-width="0.8"/><circle cx="40" cy="0" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><circle cx="-40" cy="0" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><circle cx="20" cy="34.6" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><circle cx="-20" cy="34.6" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><circle cx="20" cy="-34.6" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><circle cx="-20" cy="-34.6" r="20" fill="none" stroke="%23007755" stroke-width="0.6"/><polygon points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" fill="none" stroke="%23007755" stroke-width="0.8" opacity="0.5"/><polygon points="0,-40 34.6,-20 34.6,20 0,40 -34.6,20 -34.6,-20" fill="none" stroke="%23005533" stroke-width="0.6" opacity="0.4"/><line x1="0" y1="-80" x2="0" y2="80" stroke="%23007755" stroke-width="0.4" opacity="0.3"/><line x1="-69.3" y1="-40" x2="69.3" y2="40" stroke="%23007755" stroke-width="0.4" opacity="0.3"/><line x1="-69.3" y1="40" x2="69.3" y2="-40" stroke="%23007755" stroke-width="0.4" opacity="0.3"/></g></pattern></defs><rect width="100%" height="100%" fill="url(%23metatronPattern)"/></svg>');
+    background-size: 600px 450px;
+    background-repeat: repeat;
+    opacity: 0.4;
+    z-index: -2;
+    pointer-events: none;
 }
 
 /* Chakra Sacred Geometry Background - Subtle Integration */
@@ -195,7 +222,7 @@ body::before {
 }
 
 .hero-title {
-    font-family: 'Orbitron', monospace;
+    font-family: 'Orbitron', 'Cinzel', monospace;
     font-size: 4rem;
     font-weight: 900;
     margin-bottom: 1.5rem;
@@ -210,6 +237,25 @@ body::before {
     -webkit-text-fill-color: transparent;
     animation: cosmic-glow 4s ease-in-out infinite, pulse-glow 3s ease-in-out infinite alternate;
     letter-spacing: 3px;
+    unicode-bidi: normal;
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: "liga" 1, "calt" 1;
+    font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* Clase específica para texto rúnico */
+.runic-text {
+    font-family: 'Cinzel', 'Orbitron', serif !important;
+    font-size: 4.2rem !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: 4px !important;
+    unicode-bidi: normal !important;
+    direction: ltr !important;
+    text-rendering: geometricPrecision !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    font-variant-ligatures: none !important;
 }
 
 @keyframes cosmic-glow {
@@ -1270,6 +1316,7 @@ div[id*="chatbase"]:not([id*="bubble"]) {
     left: 0;
     right: 0;
     background: rgba(31, 41, 55, 0.95);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     color: white;
     padding: 20px;

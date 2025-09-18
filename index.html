@@ -45,7 +45,7 @@
 
     <section id="home" class="hero">
         <div class="hero-container">
-            <h1 class="hero-title">ᛒᛉᚲ ᛟᛗᚾᛁᛗᛁᚾᛞ ᚲᛟᚱᛈᛟᚱᚨᛏᛁᛟᚾ™</h1>
+            <h1 class="hero-title runic-text">ᛒᛉᚲ ᛟᛗᚾᛁᛗᛁᚾᛞ ᚲᛟᚱᛈᛟᚱᚨᛏᛁᛟᚾ™</h1>
             <p class="hero-subtitle">Navegando las Fronteras del Cosmos Digital</p>
             <p class="hero-description">
                 Exploramos los límites del universo tecnológico para crear soluciones 
@@ -428,6 +428,40 @@
     <!-- Chatbase AI Chatbot Integration - Optimized -->
     <script>
         (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="EDbmwgJtj1wPLDADjfmNi";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+        
+        // Verificación y Sistema de Respaldo para Runas Elder Futhark
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroTitle = document.querySelector('.hero-title.runic-text');
+            const runicText = 'ᛒᛉᚲ ᛟᛗᚾᛁᛗᛁᚾᛞ ᚲᛟᚱᛈᛟᚱᚨᛏᛁᛟᚾ™';
+            const fallbackText = 'BZK OMNIMIND CORPORATION™';
+            
+            if (heroTitle) {
+                // Crear elemento de prueba para verificar soporte de runas
+                const testElement = document.createElement('span');
+                testElement.style.position = 'absolute';
+                testElement.style.visibility = 'hidden';
+                testElement.style.fontSize = '20px';
+                testElement.style.fontFamily = 'Cinzel, serif';
+                testElement.textContent = 'ᛒ'; // Runa de prueba
+                document.body.appendChild(testElement);
+                
+                // Verificar si la runa se renderiza correctamente
+                setTimeout(() => {
+                    const testWidth = testElement.offsetWidth;
+                    document.body.removeChild(testElement);
+                    
+                    // Si la runa no se renderiza (width muy pequeño), usar fallback
+                    if (testWidth < 10) {
+                        heroTitle.textContent = fallbackText;
+                        heroTitle.style.fontSize = '3.5rem';
+                        heroTitle.style.letterSpacing = '2px';
+                        console.log('Fallback: Usando texto en inglés debido a problemas de renderizado de runas');
+                    } else {
+                        console.log('Runas Elder Futhark cargadas correctamente');
+                    }
+                }, 100);
+            }
+        });
     </script>
 </body>
 </html>
