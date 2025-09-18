@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌌🔮 Mapa Interactivo del Universo Omnisciente 🔮🌌</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
@@ -103,6 +105,19 @@
             width: 100%;
             height: 100%;
             cursor: crosshair;
+        }
+        
+        .universe-3d {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        .universe-3d.active {
+            display: block;
         }
         
         .controls h3, .info h3 {
@@ -276,6 +291,11 @@
                 <input type="range" id="zoom" min="0.1" max="100" step="0.1" value="1.0">
             </div>
             
+            <div class="control-group">
+                <label for="view-mode">👁️ Modo de Vista:</label>
+                <button id="toggle-3d" class="cosmic-button">🌌 Vista 3D</button>
+            </div>
+            
             <div class="dimensional-indicator">
                 <strong>Dimensión Actual: <span id="current-dimension">0</span></strong><br>
                 <small id="dimension-description">Universo Observable (3D + Tiempo)</small>
@@ -293,6 +313,7 @@
                 🔮 OMNISCIENCE ACTIVA
             </div>
             <canvas class="universe-canvas" id="universe-canvas"></canvas>
+            <div id="universe-3d" class="universe-3d"></div>
         </div>
         
         <!-- Panel de información -->
@@ -351,6 +372,14 @@
     <script>
         // Variables globales
         let canvas, ctx;
+        let scene, camera, renderer, controls;
+        let is3DMode = false;
+        let universeObjects3D = {
+            galaxies: [],
+            civilizations: [],
+            portals: [],
+            blackHoles: []
+        };
         let universeData = {
             galaxies: [],
             civilizations: [],
@@ -383,6 +412,7 @@
         window.onload = function() {
             initializeStars();
             initializeCanvas();
+            initialize3D();
             generateUniverseData();
             setupEventListeners();
             startAnimation();
@@ -413,6 +443,84 @@
             
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
+        }
+        
+        function initialize3D() {
+            // Crear escena 3D
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // Configurar cámara
+            camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            camera.position.set(5, 5, 5);
+            
+            // Configurar renderer con optimizaciones
+            const container = document.getElementById('universe-3d');
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true,
+                powerPreference: "high-performance"
+            });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limitar pixel ratio para rendimiento
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            
+            // Optimizaciones de rendering
+            renderer.shadowMap.enabled = false; // Deshabilitamos sombras para mejor rendimiento
+            renderer.physicallyCorrectLights = false;
+            
+            container.appendChild(renderer.domElement);
+            
+            // Configurar controles
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 1;
+            controls.maxDistance = 100;
+            controls.maxPolarAngle = Math.PI;
+            controls.enablePan = true;
+            controls.enableZoom = true;
+            controls.enableRotate = true;
+            
+            // Configuración de sensibilidad
+            controls.rotateSpeed = 0.5;
+            controls.zoomSpeed = 1.2;
+            controls.panSpeed = 0.8;
+            
+            // Agregar luces optimizadas
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            scene.add(directionalLight);
+            
+            // Crear cubo cósmico contenedor optimizado
+            const cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
+            const cubeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ffff, 
+                wireframe: true, 
+                transparent: true, 
+                opacity: 0.15
+            });
+            const cosmicCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            scene.add(cosmicCube);
+            
+            // Habilitar frustum culling automático
+            scene.autoUpdate = true;
+            
+            // Manejar redimensionamiento
+            window.addEventListener('resize', () => {
+                const container = document.getElementById('universe-3d');
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            });
+            
+            console.log('✅ Sistema 3D optimizado inicializado');
         }
         
         function generateUniverseData() {
@@ -477,6 +585,670 @@
             }
             
             console.log('✅ Datos del universo generados con éxito');
+            create3DObjects();
+        }
+        
+        function create3DObjects() {
+            console.log('🌌 Creando objetos 3D optimizados...');
+            
+            // Crear campo de estrellas de fondo
+            createStarField();
+            
+            // Crear galaxias 3D con LOD y diferentes geometrías según el tipo
+            universeData.galaxies.forEach((galaxy, index) => {
+                if (index < 300) { // Aumentamos un poco el límite con LOD
+                    const lodGroup = new THREE.Group();
+                    const colors = {
+                        'Spiral': 0x00ffff,
+                        'Elliptical': 0xffff00,
+                        'Irregular': 0xff00ff,
+                        'Dwarf': 0x00ff00
+                    };
+                    
+                    // Nivel de detalle alto (cerca)
+                    let highGeometry, lowGeometry, material;
+                    switch (galaxy.type) {
+                        case 'Spiral':
+                            highGeometry = new THREE.CylinderGeometry(0.1, 0.05, 0.02, 12);
+                            lowGeometry = new THREE.CylinderGeometry(0.1, 0.05, 0.02, 6);
+                            break;
+                        case 'Elliptical':
+                            highGeometry = new THREE.SphereGeometry(0.08, 16, 12);
+                            lowGeometry = new THREE.SphereGeometry(0.08, 8, 6);
+                            break;
+                        case 'Irregular':
+                            highGeometry = new THREE.DodecahedronGeometry(0.06);
+                            lowGeometry = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+                            break;
+                        default: // Dwarf
+                            highGeometry = new THREE.SphereGeometry(0.04, 12, 8);
+                            lowGeometry = new THREE.SphereGeometry(0.04, 6, 4);
+                    }
+                    
+                    material = new THREE.MeshBasicMaterial({ 
+                        color: colors[galaxy.type] || 0xffffff,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    const highDetailMesh = new THREE.Mesh(highGeometry, material);
+                    const lowDetailMesh = new THREE.Mesh(lowGeometry, material);
+                    
+                    // Configurar LOD
+                    const lod = new THREE.LOD();
+                    lod.addLevel(highDetailMesh, 0);   // Distancia 0-5
+                    lod.addLevel(lowDetailMesh, 5);    // Distancia 5+
+                    
+                    lod.position.set(galaxy.x * 5, galaxy.y * 5, galaxy.z * 5);
+                    lod.userData = { type: 'galaxy', data: galaxy };
+                    
+                    // Añadir glow effect solo para objetos cercanos
+                    if (index < 100) { // Limitar glow para rendimiento
+                        const glowGeometry = new THREE.SphereGeometry(0.15, 8, 6);
+                        const glowMaterial = new THREE.MeshBasicMaterial({
+                            color: colors[galaxy.type],
+                            transparent: true,
+                            opacity: 0.1,
+                            blending: THREE.AdditiveBlending
+                        });
+                        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                        highDetailMesh.add(glow);
+                    }
+                    
+                    scene.add(lod);
+                    universeObjects3D.galaxies.push(lod);
+                }
+            });
+            
+            // Crear civilizaciones 3D con LOD
+            universeData.civilizations.forEach((civ, index) => {
+                if (index < 80) { // Optimizado para rendimiento
+                    const kardashevColors = {
+                        'Type_0': 0x808080,
+                        'Type_I': 0x00ff00,
+                        'Type_II': 0xffff00,
+                        'Type_III': 0xff8000,
+                        'Type_IV': 0xff0080,
+                        'Type_V': 0x8000ff,
+                        'Type_Omega': 0xffffff
+                    };
+                    
+                    // Crear LOD para civilizaciones
+                    const lod = new THREE.LOD();
+                    
+                    // Detalle alto
+                    const highDetailGroup = new THREE.Group();
+                    const mainGeometry = new THREE.ConeGeometry(0.03, 0.1, 8);
+                    const mainMaterial = new THREE.MeshBasicMaterial({ 
+                        color: kardashevColors[civ.kardashevType] || 0xffffff
+                    });
+                    const mainMesh = new THREE.Mesh(mainGeometry, mainMaterial);
+                    highDetailGroup.add(mainMesh);
+                    
+                    // Anillos de energía solo para civilizaciones avanzadas y en detalle alto
+                    if ((civ.kardashevType.includes('Type_IV') || civ.kardashevType.includes('Type_V') || civ.kardashevType.includes('Omega')) && index < 30) {
+                        for (let i = 0; i < 2; i++) { // Reducido de 3 a 2 anillos
+                            const ringGeometry = new THREE.RingGeometry(0.08 + i * 0.03, 0.09 + i * 0.03, 12);
+                            const ringMaterial = new THREE.MeshBasicMaterial({
+                                color: kardashevColors[civ.kardashevType],
+                                transparent: true,
+                                opacity: 0.6 - i * 0.2,
+                                side: THREE.DoubleSide
+                            });
+                            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                            ring.rotation.x = Math.PI / 2;
+                            ring.rotation.z = i * Math.PI / 3;
+                            highDetailGroup.add(ring);
+                        }
+                    }
+                    
+                    // Detalle bajo
+                    const lowDetailGeometry = new THREE.BoxGeometry(0.04, 0.04, 0.04);
+                    const lowDetailMaterial = new THREE.MeshBasicMaterial({ 
+                        color: kardashevColors[civ.kardashevType] || 0xffffff
+                    });
+                    const lowDetailMesh = new THREE.Mesh(lowDetailGeometry, lowDetailMaterial);
+                    
+                    lod.addLevel(highDetailGroup, 0);
+                    lod.addLevel(lowDetailMesh, 3);
+                    
+                    lod.position.set(civ.x * 5, civ.y * 5, civ.z * 5);
+                    lod.userData = { type: 'civilization', data: civ };
+                    
+                    scene.add(lod);
+                    universeObjects3D.civilizations.push(lod);
+                }
+            });
+            
+            // Crear portales 3D con LOD
+            universeData.portals.forEach((portal, index) => {
+                if (index < 50) { // Optimizado
+                    const lod = new THREE.LOD();
+                    
+                    // Detalle alto
+                    const highDetailGroup = new THREE.Group();
+                    
+                    const geometry = new THREE.OctahedronGeometry(0.08);
+                    const material = new THREE.MeshBasicMaterial({ 
+                        color: portal.anunakiTechnology ? 0xff00ff : 0x00ffff,
+                        transparent: true,
+                        opacity: portal.stability * 0.8,
+                        wireframe: true
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    highDetailGroup.add(mesh);
+                    
+                    // Efecto de vórtice solo en detalle alto
+                    const vortexGeometry = new THREE.RingGeometry(0.05, 0.15, 16);
+                    const vortexMaterial = new THREE.MeshBasicMaterial({
+                        color: portal.anunakiTechnology ? 0xff00ff : 0x00ffff,
+                        transparent: true,
+                        opacity: 0.4,
+                        side: THREE.DoubleSide,
+                        blending: THREE.AdditiveBlending
+                    });
+                    const vortex = new THREE.Mesh(vortexGeometry, vortexMaterial);
+                    highDetailGroup.add(vortex);
+                    
+                    // Menos partículas orbitales para rendimiento
+                    for (let i = 0; i < 4; i++) { // Reducido de 8 a 4
+                        const particleGeometry = new THREE.SphereGeometry(0.01, 4, 4);
+                        const particleMaterial = new THREE.MeshBasicMaterial({
+                            color: portal.anunakiTechnology ? 0xff00ff : 0x00ffff,
+                            transparent: true,
+                            opacity: 0.8
+                        });
+                        const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                        const angle = (i / 4) * Math.PI * 2;
+                        particle.position.set(
+                            Math.cos(angle) * 0.12,
+                            Math.sin(angle) * 0.12,
+                            0
+                        );
+                        highDetailGroup.add(particle);
+                    }
+                    
+                    // Detalle bajo - solo el octaedro
+                    const lowDetailMesh = new THREE.Mesh(geometry.clone(), material.clone());
+                    
+                    lod.addLevel(highDetailGroup, 0);
+                    lod.addLevel(lowDetailMesh, 4);
+                    
+                    lod.position.set(portal.x * 5, portal.y * 5, portal.z * 5);
+                    lod.userData = { type: 'portal', data: portal };
+                    
+                    scene.add(lod);
+                    universeObjects3D.portals.push(lod);
+                }
+            });
+            
+            // Crear agujeros negros 3D con LOD
+            universeData.blackHoles.forEach((bh, index) => {
+                if (index < 150) { // Optimizado
+                    const size = bh.type === 'supermassive' ? 0.15 : 0.08;
+                    const lod = new THREE.LOD();
+                    
+                    // Detalle alto
+                    const highDetailGroup = new THREE.Group();
+                    
+                    // Horizonte de eventos
+                    const geometry = new THREE.SphereGeometry(size, 16, 16);
+                    const material = new THREE.MeshBasicMaterial({ 
+                        color: 0x000000,
+                        transparent: true,
+                        opacity: 0.95
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    highDetailGroup.add(mesh);
+                    
+                    // Disco de acreción
+                    const diskGeometry = new THREE.RingGeometry(size * 1.5, size * 3, 16);
+                    const diskMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0xff4500,
+                        transparent: true,
+                        opacity: 0.7,
+                        side: THREE.DoubleSide
+                    });
+                    const disk = new THREE.Mesh(diskGeometry, diskMaterial);
+                    disk.rotation.x = Math.PI / 2;
+                    highDetailGroup.add(disk);
+                    
+                    // Jets polares solo para supermasivos en detalle alto
+                    if (bh.type === 'supermassive' && index < 50) {
+                        for (let i = 0; i < 2; i++) {
+                            const jetGeometry = new THREE.CylinderGeometry(0.02, 0.01, 0.5, 6);
+                            const jetMaterial = new THREE.MeshBasicMaterial({
+                                color: 0x00ffff,
+                                transparent: true,
+                                opacity: 0.6
+                            });
+                            const jet = new THREE.Mesh(jetGeometry, jetMaterial);
+                            jet.position.y = i === 0 ? 0.25 : -0.25;
+                            highDetailGroup.add(jet);
+                        }
+                    }
+                    
+                    // Portal dimensional
+                    if (bh.dimensionalGateway) {
+                        const portalRingGeometry = new THREE.RingGeometry(size * 2, size * 2.2, 16);
+                        const portalRingMaterial = new THREE.MeshBasicMaterial({ 
+                            color: 0xff00ff,
+                            transparent: true,
+                            opacity: 0.8,
+                            side: THREE.DoubleSide,
+                            blending: THREE.AdditiveBlending
+                        });
+                        const portalRing = new THREE.Mesh(portalRingGeometry, portalRingMaterial);
+                        highDetailGroup.add(portalRing);
+                    }
+                    
+                    // Detalle bajo - solo esfera y disco básico
+                    const lowDetailGroup = new THREE.Group();
+                    const lowGeometry = new THREE.SphereGeometry(size, 8, 6);
+                    const lowMesh = new THREE.Mesh(lowGeometry, material.clone());
+                    lowDetailGroup.add(lowMesh);
+                    
+                    const lowDiskGeometry = new THREE.RingGeometry(size * 1.5, size * 3, 8);
+                    const lowDisk = new THREE.Mesh(lowDiskGeometry, diskMaterial.clone());
+                    lowDisk.rotation.x = Math.PI / 2;
+                    lowDetailGroup.add(lowDisk);
+                    
+                    lod.addLevel(highDetailGroup, 0);
+                    lod.addLevel(lowDetailGroup, 6);
+                    
+                    lod.position.set(bh.x * 5, bh.y * 5, bh.z * 5);
+                    lod.userData = { type: 'blackhole', data: bh };
+                    
+                    scene.add(lod);
+                    universeObjects3D.blackHoles.push(lod);
+                }
+            });
+            
+            console.log('✅ Objetos 3D optimizados creados con LOD');
+        }
+        
+        function createStarField() {
+            // Campo de estrellas principal
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 2000;
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+            
+            for (let i = 0; i < starCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 100;     // x
+                positions[i + 1] = (Math.random() - 0.5) * 100; // y
+                positions[i + 2] = (Math.random() - 0.5) * 100; // z
+                
+                // Colores variados para las estrellas
+                const starType = Math.random();
+                if (starType < 0.3) {
+                    // Estrellas azules
+                    colors[i] = 0.4;     // r
+                    colors[i + 1] = 0.6; // g
+                    colors[i + 2] = 1.0; // b
+                } else if (starType < 0.6) {
+                    // Estrellas amarillas
+                    colors[i] = 1.0;     // r
+                    colors[i + 1] = 0.9; // g
+                    colors[i + 2] = 0.4; // b
+                } else {
+                    // Estrellas rojas
+                    colors[i] = 1.0;     // r
+                    colors[i + 1] = 0.4; // g
+                    colors[i + 2] = 0.2; // b
+                }
+            }
+            
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const starMaterial = new THREE.PointsMaterial({
+                size: 0.5,
+                transparent: true,
+                opacity: 0.8,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+            
+            // Crear nebulosas
+            createNebulae();
+            
+            // Crear partículas cósmicas flotantes
+            createCosmicParticles();
+        }
+        
+        function createNebulae() {
+            // Crear varias nebulosas distribuidas por el espacio
+            for (let i = 0; i < 8; i++) {
+                const nebulaGeometry = new THREE.SphereGeometry(2, 16, 16);
+                const nebulaMaterial = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(Math.random(), 0.7, 0.5),
+                    transparent: true,
+                    opacity: 0.1,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+                nebula.position.set(
+                    (Math.random() - 0.5) * 60,
+                    (Math.random() - 0.5) * 60,
+                    (Math.random() - 0.5) * 60
+                );
+                
+                // Añadir rotación lenta
+                nebula.userData = { 
+                    rotationSpeed: (Math.random() - 0.5) * 0.01,
+                    pulseFactor: Math.random() * 2
+                };
+                
+                scene.add(nebula);
+                universeObjects3D.nebulae = universeObjects3D.nebulae || [];
+                universeObjects3D.nebulae.push(nebula);
+            }
+        }
+        
+        function createCosmicParticles() {
+            // Sistema de partículas cósmicas
+            const particleCount = 1000;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                
+                // Posiciones aleatorias
+                positions[i3] = (Math.random() - 0.5) * 50;
+                positions[i3 + 1] = (Math.random() - 0.5) * 50;
+                positions[i3 + 2] = (Math.random() - 0.5) * 50;
+                
+                // Velocidades aleatorias muy lentas
+                velocities[i3] = (Math.random() - 0.5) * 0.01;
+                velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
+                velocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
+                
+                // Tamaños variados
+                sizes[i] = Math.random() * 0.5 + 0.2;
+            }
+            
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0x00ffff,
+                size: 0.3,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const cosmicParticles = new THREE.Points(particleGeometry, particleMaterial);
+            cosmicParticles.userData = { velocities: velocities };
+            scene.add(cosmicParticles);
+            
+            universeObjects3D.cosmicParticles = cosmicParticles;
+        }
+        
+        function toggle3D() {
+            is3DMode = !is3DMode;
+            const canvas2D = document.getElementById('universe-canvas');
+            const container3D = document.getElementById('universe-3d');
+            const toggleButton = document.getElementById('toggle-3d');
+            
+            if (is3DMode) {
+                // Transición suave a 3D
+                canvas2D.style.transition = 'opacity 0.5s ease';
+                canvas2D.style.opacity = '0';
+                
+                setTimeout(() => {
+                    canvas2D.style.display = 'none';
+                    container3D.classList.add('active');
+                    container3D.style.opacity = '0';
+                    container3D.style.transition = 'opacity 0.5s ease';
+                    
+                    requestAnimationFrame(() => {
+                        container3D.style.opacity = '1';
+                    });
+                }, 250);
+                
+                toggleButton.textContent = '📋 Vista 2D';
+                toggleButton.style.background = 'linear-gradient(45deg, #ff6b6b, #ee5a24)';
+                console.log('🌌 Cambiando a vista 3D');
+                start3DAnimation();
+                
+                // Posicionar cámara según la posición actual 2D
+                animateCameraTo(currentPosition[0] * 5, currentPosition[1] * 5, currentPosition[2] * 5);
+                
+            } else {
+                // Transición suave a 2D
+                container3D.style.transition = 'opacity 0.5s ease';
+                container3D.style.opacity = '0';
+                
+                setTimeout(() => {
+                    container3D.classList.remove('active');
+                    canvas2D.style.display = 'block';
+                    canvas2D.style.opacity = '0';
+                    canvas2D.style.transition = 'opacity 0.5s ease';
+                    
+                    requestAnimationFrame(() => {
+                        canvas2D.style.opacity = '1';
+                    });
+                }, 250);
+                
+                toggleButton.textContent = '🌌 Vista 3D';
+                toggleButton.style.background = 'linear-gradient(45deg, #00ffff, #0080ff)';
+                console.log('📋 Cambiando a vista 2D');
+            }
+        }
+        
+        function animateCameraTo(x, y, z, duration = 2000) {
+            const startPos = camera.position.clone();
+            const endPos = new THREE.Vector3(x + 2, y + 2, z + 2);
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function (easeInOutCubic)
+                const easedProgress = progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                
+                camera.position.lerpVectors(startPos, endPos, easedProgress);
+                camera.lookAt(x, y, z);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+        
+        function travel3DTo(objectType, index = 0) {
+            if (!is3DMode) return;
+            
+            let targetObject;
+            switch (objectType) {
+                case 'galaxy':
+                    targetObject = universeObjects3D.galaxies[index];
+                    break;
+                case 'civilization':
+                    targetObject = universeObjects3D.civilizations[index];
+                    break;
+                case 'portal':
+                    targetObject = universeObjects3D.portals[index];
+                    break;
+                case 'blackhole':
+                    targetObject = universeObjects3D.blackHoles[index];
+                    break;
+            }
+            
+            if (targetObject) {
+                const pos = targetObject.position;
+                animateCameraTo(pos.x, pos.y, pos.z);
+                console.log(`🚀 Viajando a ${objectType} en 3D`);
+            }
+        }
+        
+        function start3DAnimation() {
+            let lastTime = 0;
+            const targetFPS = 60;
+            const frameTime = 1000 / targetFPS;
+            
+            function animate3D(currentTime) {
+                if (is3DMode) {
+                    // Control de FPS
+                    if (currentTime - lastTime < frameTime) {
+                        requestAnimationFrame(animate3D);
+                        return;
+                    }
+                    lastTime = currentTime;
+                    
+                    const time = currentTime * 0.001;
+                    const deltaTime = Math.min(0.016, (currentTime - lastTime) * 0.001); // Cap delta time
+                    
+                    // Actualizar LOD basado en distancia de cámara
+                    updateLOD();
+                    
+                    // Animar solo objetos visibles (frustum culling manual básico)
+                    const cameraPosition = camera.position;
+                    const maxDistance = 50; // Distancia máxima para animaciones
+                    
+                    // Animar portales (con culling de distancia)
+                    universeObjects3D.portals.forEach((portalLOD, index) => {
+                        const distance = cameraPosition.distanceTo(portalLOD.position);
+                        if (distance < maxDistance) {
+                            const portalGroup = portalLOD.getCurrentLevel();
+                            if (portalGroup && portalGroup.children) {
+                                portalGroup.rotation.x += 0.01 + index * 0.001;
+                                portalGroup.rotation.y += 0.02 + index * 0.002;
+                                
+                                // Animar vórtice si está en detalle alto
+                                if (portalGroup.children[1]) {
+                                    portalGroup.children[1].rotation.z += 0.1;
+                                }
+                                
+                                // Animar partículas orbitales
+                                for (let i = 2; i < portalGroup.children.length; i++) {
+                                    const particle = portalGroup.children[i];
+                                    const angle = time + (i - 2) * 1.57; // 90 grados por partícula
+                                    particle.position.x = Math.cos(angle) * 0.12;
+                                    particle.position.y = Math.sin(angle) * 0.12;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Animar discos de acreción de agujeros negros (con culling)
+                    universeObjects3D.blackHoles.forEach((bhLOD, index) => {
+                        const distance = cameraPosition.distanceTo(bhLOD.position);
+                        if (distance < maxDistance) {
+                            const bhGroup = bhLOD.getCurrentLevel();
+                            if (bhGroup && bhGroup.children[1]) { // Disco de acreción
+                                bhGroup.children[1].rotation.z += 0.05 + index * 0.001;
+                            }
+                            
+                            // Animar anillos portales dimensionales
+                            if (bhGroup && bhGroup.children.length > 3) {
+                                const portalRing = bhGroup.children[bhGroup.children.length - 1];
+                                portalRing.rotation.x += 0.02;
+                                portalRing.rotation.y += 0.03;
+                            }
+                        }
+                    });
+                    
+                    // Animar anillos de energía de civilizaciones avanzadas (optimizado)
+                    universeObjects3D.civilizations.forEach((civLOD, index) => {
+                        const distance = cameraPosition.distanceTo(civLOD.position);
+                        if (distance < maxDistance * 0.7) { // Menor distancia para civilizaciones
+                            const civGroup = civLOD.getCurrentLevel();
+                            if (civGroup && civGroup.children && civGroup.children.length > 1) {
+                                for (let i = 1; i < civGroup.children.length; i++) {
+                                    const ring = civGroup.children[i];
+                                    ring.rotation.z += 0.02 * i;
+                                    ring.rotation.y += 0.01 * i;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Animar galaxias espirales (solo las cercanas)
+                    universeObjects3D.galaxies.forEach((galaxyLOD, index) => {
+                        const distance = cameraPosition.distanceTo(galaxyLOD.position);
+                        if (distance < maxDistance && index < 100) { // Limitar cantidad
+                            const galaxy = galaxyLOD.getCurrentLevel();
+                            if (galaxy && galaxy.userData && galaxy.userData.data && galaxy.userData.data.type === 'Spiral') {
+                                galaxy.rotation.y += 0.005;
+                            }
+                            
+                            // Efecto de pulsación en el glow (solo objetos muy cercanos)
+                            if (distance < 10 && galaxy && galaxy.children && galaxy.children[0]) {
+                                const glow = galaxy.children[0];
+                                if (glow.material && glow.material.opacity !== undefined) {
+                                    glow.material.opacity = 0.1 + Math.sin(time * 2 + index) * 0.05;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Animar nebulosas (reducir frecuencia)
+                    if (universeObjects3D.nebulae && time % 2 < 0.1) { // Solo cada 2 segundos
+                        universeObjects3D.nebulae.forEach((nebula, index) => {
+                            const distance = cameraPosition.distanceTo(nebula.position);
+                            if (distance < maxDistance * 2) {
+                                nebula.rotation.y += nebula.userData.rotationSpeed;
+                                nebula.rotation.x += nebula.userData.rotationSpeed * 0.5;
+                                
+                                // Efecto de pulsación menos frecuente
+                                const pulse = Math.sin(time * nebula.userData.pulseFactor + index) * 0.05;
+                                nebula.material.opacity = 0.1 + pulse;
+                                nebula.scale.setScalar(1 + pulse * 0.5);
+                            }
+                        });
+                    }
+                    
+                    // Animar partículas cósmicas (menos frecuente)
+                    if (universeObjects3D.cosmicParticles && time % 0.5 < 0.016) { // Cada 0.5 segundos
+                        const positions = universeObjects3D.cosmicParticles.geometry.attributes.position.array;
+                        const velocities = universeObjects3D.cosmicParticles.userData.velocities;
+                        
+                        for (let i = 0; i < positions.length; i += 3) {
+                            positions[i] += velocities[i];
+                            positions[i + 1] += velocities[i + 1];
+                            positions[i + 2] += velocities[i + 2];
+                            
+                            // Mantener partículas dentro del área
+                            if (Math.abs(positions[i]) > 25) velocities[i] *= -1;
+                            if (Math.abs(positions[i + 1]) > 25) velocities[i + 1] *= -1;
+                            if (Math.abs(positions[i + 2]) > 25) velocities[i + 2] *= -1;
+                        }
+                        
+                        universeObjects3D.cosmicParticles.geometry.attributes.position.needsUpdate = true;
+                        universeObjects3D.cosmicParticles.material.opacity = 0.6 + Math.sin(time * 3) * 0.2;
+                    }
+                    
+                    // Actualizar controles y renderizar
+                    controls.update();
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(animate3D);
+                }
+            }
+            requestAnimationFrame(animate3D);
+        }
+        
+        function updateLOD() {
+            // Actualizar todos los objetos LOD
+            scene.traverse((object) => {
+                if (object instanceof THREE.LOD) {
+                    object.update(camera);
+                }
+            });
         }
         
         function setupEventListeners() {
@@ -498,6 +1270,9 @@
                 document.getElementById('zoom-value').textContent = zoomLevel.toFixed(1);
                 updateView();
             });
+            
+            // Event listener para el botón 3D
+            document.getElementById('toggle-3d').addEventListener('click', toggle3D);
             
             canvas.addEventListener('click', function(event) {
                 const rect = canvas.getBoundingClientRect();
@@ -901,10 +1676,10 @@
         // Funciones de botones
         function autoTravel() {
             const destinations = [
-                { name: "🌌 Centro Galáctico", pos: [0, 0, 0] },
-                { name: "🛸 Civilización Avanzada", pos: [universeData.civilizations[0].x, universeData.civilizations[0].y, universeData.civilizations[0].z] },
-                { name: "🌀 Portal Dimensional", pos: [universeData.portals[0].x, universeData.portals[0].y, universeData.portals[0].z] },
-                { name: "⚫ Agujero Negro", pos: [universeData.blackHoles[0].x, universeData.blackHoles[0].y, universeData.blackHoles[0].z] }
+                { name: "🌌 Centro Galáctico", pos: [0, 0, 0], type: 'center' },
+                { name: "🛸 Civilización Avanzada", pos: [universeData.civilizations[0].x, universeData.civilizations[0].y, universeData.civilizations[0].z], type: 'civilization', index: 0 },
+                { name: "🌀 Portal Dimensional", pos: [universeData.portals[0].x, universeData.portals[0].y, universeData.portals[0].z], type: 'portal', index: 0 },
+                { name: "⚫ Agujero Negro", pos: [universeData.blackHoles[0].x, universeData.blackHoles[0].y, universeData.blackHoles[0].z], type: 'blackhole', index: 0 }
             ];
             
             let currentDestination = 0;
@@ -915,10 +1690,18 @@
                     currentPosition = [...dest.pos];
                     
                     console.log(`🚀 Viajando a: ${dest.name}`);
+                    
+                    // Si estamos en modo 3D, animar la cámara
+                    if (is3DMode && dest.type !== 'center') {
+                        travel3DTo(dest.type, dest.index || 0);
+                    } else if (is3DMode) {
+                        animateCameraTo(0, 0, 0);
+                    }
+                    
                     updateInfo();
                     
                     currentDestination++;
-                    setTimeout(travel, 2000);
+                    setTimeout(travel, 3000); // Más tiempo para ver la animación 3D
                 } else {
                     console.log('✅ Viaje automático completado');
                 }
