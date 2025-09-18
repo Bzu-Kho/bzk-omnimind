@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌🔮 Mapa Interactivo del Universo Omnisciente 🔮🌌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 35%, #0f0f23 100%);
+            color: #00ffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #00ffff;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ffff; }
+            to { text-shadow: 0 0 30px #00ffff, 0 0 40px #00ffff; }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            min-height: calc(100vh - 120px);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .panel {
+            background: rgba(0, 20, 40, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .universe-view {
+            position: relative;
+            background: black;
+            border-radius: 10px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+        
+        .universe-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        
+        .controls h3, .info h3 {
+            color: #00ffff;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .control-group select, 
+        .control-group input[type="range"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .control-group input[type="range"] {
+            height: 25px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            color: black;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .cosmic-stats {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00ffff;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .stat-value {
+            color: #ffff00;
+            font-weight: bold;
+        }
+        
+        .dimensional-indicator {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .coordinates {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #00ff00;
+        }
+        
+        .nearby-objects {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ff00ff;
+        }
+        
+        .object-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            border-left: 3px solid;
+        }
+        
+        .galaxy { border-left-color: #00ffff; }
+        .civilization { border-left-color: #ffff00; }
+        .portal { border-left-color: #ff00ff; }
+        .blackhole { border-left-color: #ff0000; }
+        
+        .omniscient-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 0, 0.9);
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 100;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .panel {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fondo de estrellas -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Encabezado -->
+    <header class="header">
+        <h1>🌌🔮 MAPA INTERACTIVO DEL UNIVERSO 🔮🌌</h1>
+        <div class="subtitle">
+            🧠 Conocimiento Universal: 1,064.84% | 🌟 Reality Manipulation: ACTIVA | 🔮 Fase: COSMIC_INTEGRATION
+        </div>
+    </header>
+    
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Panel de controles -->
+        <div class="panel controls">
+            <h3>🎮 CONTROLES CÓSMICOS</h3>
+            
+            <div class="control-group">
+                <label for="scale">📏 Escala de Observación:</label>
+                <select id="scale">
+                    <option value="observable_universe">Universo Observable</option>
+                    <option value="local_group">Grupo Local</option>
+                    <option value="milky_way">Vía Láctea</option>
+                    <option value="solar_system">Sistema Solar</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="dimension">🌀 Dimensión: <span id="dimension-value">0</span></label>
+                <input type="range" id="dimension" min="0" max="10" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="zoom">🔍 Zoom: <span id="zoom-value">1.0</span>x</label>
+                <input type="range" id="zoom" min="0.1" max="100" step="0.1" value="1.0">
+            </div>
+            
+            <div class="dimensional-indicator">
+                <strong>Dimensión Actual: <span id="current-dimension">0</span></strong><br>
+                <small id="dimension-description">Universo Observable (3D + Tiempo)</small>
+            </div>
+            
+            <button class="btn" onclick="autoTravel()">🚀 Viaje Automático</button>
+            <button class="btn" onclick="cosmicAnalysis()">📊 Análisis Cósmico</button>
+            <button class="btn" onclick="omniscientView()">🔮 Vista Omnisciente</button>
+            <button class="btn" onclick="resetView()">🔄 Reiniciar Vista</button>
+        </div>
+        
+        <!-- Vista principal del universo -->
+        <div class="panel universe-view">
+            <div class="omniscient-overlay">
+                🔮 OMNISCIENCE ACTIVA
+            </div>
+            <canvas class="universe-canvas" id="universe-canvas"></canvas>
+        </div>
+        
+        <!-- Panel de información -->
+        <div class="panel info">
+            <h3>📊 INFORMACIÓN CÓSMICA</h3>
+            
+            <div class="cosmic-stats">
+                <h4>🌌 Parámetros Universales</h4>
+                <div class="stat-item">
+                    <span>Materia Oscura:</span>
+                    <span class="stat-value">25.9%</span>
+                </div>
+                <div class="stat-item">
+                    <span>Energía Oscura:</span>
+                    <span class="stat-value">69.1%</span>
+                </div>
+                <div class="stat-item">
+                    <span>Materia Ordinaria:</span>
+                    <span class="stat-value">5.0%</span>
+                </div>
+                <div class="stat-item">
+                    <span>Edad del Universo:</span>
+                    <span class="stat-value">13.8 Ga</span>
+                </div>
+                <div class="stat-item">
+                    <span>Diámetro Observable:</span>
+                    <span class="stat-value">93 Gly</span>
+                </div>
+            </div>
+            
+            <div class="coordinates" id="coordinates">
+                📍 Posición Actual:<br>
+                X: 0.00e+00 ly<br>
+                Y: 0.00e+00 ly<br>
+                Z: 0.00e+00 ly
+            </div>
+            
+            <h4>🎯 Objetos Cercanos</h4>
+            <div class="nearby-objects" id="nearby-objects">
+                <div class="object-item galaxy">
+                    🌌 Vía Láctea<br>
+                    <small>Distancia: 0 ly | Tipo: Spiral</small>
+                </div>
+                <div class="object-item civilization">
+                    🛸 Civilización Local<br>
+                    <small>Tipo: Type_0 | Desarrollo: 0.7%</small>
+                </div>
+                <div class="object-item portal">
+                    🌀 Portal Dimensional<br>
+                    <small>Estabilidad: 45% | Dimensión: 0→3</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Variables globales
+        let canvas, ctx;
+        let universeData = {
+            galaxies: [],
+            civilizations: [],
+            portals: [],
+            blackHoles: [],
+            wormholes: []
+        };
+        let currentPosition = [0, 0, 0];
+        let currentDimension = 0;
+        let currentScale = 'observable_universe';
+        let zoomLevel = 1.0;
+        let animationId;
+        
+        // Conocimiento omnisciente
+        const cosmicKnowledge = {
+            darkMatter: 0.259,
+            darkEnergy: 0.691,
+            ordinaryMatter: 0.050,
+            hubbleConstant: 70.0,
+            cosmicAge: 13.8e9,
+            observableDiameter: 93e9,
+            multiverseLayers: 11,
+            galacticCivilizations: 847
+        };
+        
+        // Frecuencias Anunaki
+        const anunakiFrequencies = [396, 417, 528, 639, 741, 852, 963];
+        
+        // Inicialización
+        window.onload = function() {
+            initializeStars();
+            initializeCanvas();
+            generateUniverseData();
+            setupEventListeners();
+            startAnimation();
+            updateInfo();
+        };
+        
+        function initializeStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        function initializeCanvas() {
+            canvas = document.getElementById('universe-canvas');
+            ctx = canvas.getContext('2d');
+            
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+        
+        function generateUniverseData() {
+            console.log('🌌 Generando datos del universo con conocimiento omnisciente...');
+            
+            // Generar galaxias
+            for (let i = 0; i < 1000; i++) {
+                universeData.galaxies.push({
+                    x: (Math.random() - 0.5) * 2,
+                    y: (Math.random() - 0.5) * 2,
+                    z: (Math.random() - 0.5) * 2,
+                    type: ['Spiral', 'Elliptical', 'Irregular', 'Dwarf'][Math.floor(Math.random() * 4)],
+                    mass: Math.random() * 1e14,
+                    age: Math.random() * 13.8e9,
+                    luminosity: Math.random() * 1e12,
+                    civilizationProbability: Math.random()
+                });
+            }
+            
+            // Generar civilizaciones
+            for (let i = 0; i < cosmicKnowledge.galacticCivilizations; i++) {
+                const kardashevTypes = ['Type_0', 'Type_I', 'Type_II', 'Type_III', 'Type_IV', 'Type_V', 'Type_Omega'];
+                universeData.civilizations.push({
+                    x: (Math.random() - 0.5) * 2,
+                    y: (Math.random() - 0.5) * 2,
+                    z: (Math.random() - 0.5) * 2,
+                    name: `Civilization_${i + 1}`,
+                    kardashevType: kardashevTypes[Math.floor(Math.random() * kardashevTypes.length)],
+                    technologyLevel: Math.random() * 100,
+                    dimensionalTravel: Math.random() < 0.1,
+                    realityEngineering: Math.random() < 0.01,
+                    anunakiRelated: Math.random() < 0.02,
+                    peaceIndex: Math.random() * 10
+                });
+            }
+            
+            // Generar portales dimensionales
+            for (let dim = 0; dim < cosmicKnowledge.multiverseLayers; dim++) {
+                for (let i = 0; i < 20; i++) {
+                    universeData.portals.push({
+                        x: (Math.random() - 0.5) * 2,
+                        y: (Math.random() - 0.5) * 2,
+                        z: (Math.random() - 0.5) * 2,
+                        sourceDimension: dim,
+                        targetDimension: Math.floor(Math.random() * 11),
+                        stability: Math.random(),
+                        anunakiTechnology: Math.random() < 0.08
+                    });
+                }
+            }
+            
+            // Generar agujeros negros
+            for (let i = 0; i < 500; i++) {
+                universeData.blackHoles.push({
+                    x: (Math.random() - 0.5) * 2,
+                    y: (Math.random() - 0.5) * 2,
+                    z: (Math.random() - 0.5) * 2,
+                    type: Math.random() < 0.1 ? 'supermassive' : 'stellar',
+                    mass: Math.random() < 0.1 ? Math.random() * 1e10 : Math.random() * 50,
+                    dimensionalGateway: Math.random() < 0.01
+                });
+            }
+            
+            console.log('✅ Datos del universo generados con éxito');
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('scale').addEventListener('change', function() {
+                currentScale = this.value;
+                updateView();
+            });
+            
+            document.getElementById('dimension').addEventListener('input', function() {
+                currentDimension = parseInt(this.value);
+                document.getElementById('dimension-value').textContent = currentDimension;
+                document.getElementById('current-dimension').textContent = currentDimension;
+                updateDimensionDescription();
+                updateView();
+            });
+            
+            document.getElementById('zoom').addEventListener('input', function() {
+                zoomLevel = parseFloat(this.value);
+                document.getElementById('zoom-value').textContent = zoomLevel.toFixed(1);
+                updateView();
+            });
+            
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (event.clientX - rect.left - canvas.width / 2) / (canvas.width / 4);
+                const y = (event.clientY - rect.top - canvas.height / 2) / (canvas.height / 4);
+                
+                currentPosition[0] = x;
+                currentPosition[1] = y;
+                currentPosition[2] = 0;
+                
+                updateInfo();
+            });
+        }
+        
+        function updateDimensionDescription() {
+            const descriptions = [
+                "Universo Observable (3D + Tiempo)",
+                "Realidad Paralela Alpha",
+                "Realidad Paralela Beta", 
+                "Realidad Paralela Gamma",
+                "Plano Temporal Pasado",
+                "Plano Temporal Presente",
+                "Plano Temporal Futuro",
+                "Realidad Cuántica Superposición",
+                "Realidad Cuántica Entrelazada",
+                "Realidad Cuántica Colapso",
+                "Meta-Realidad Omnisciente"
+            ];
+            
+            document.getElementById('dimension-description').textContent = descriptions[currentDimension];
+        }
+        
+        function startAnimation() {
+            function animate() {
+                drawUniverse();
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+        
+        function drawUniverse() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Fondo cósmico
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
+            );
+            gradient.addColorStop(0, 'rgba(10, 10, 30, 1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar estructuras según la dimensión actual
+            drawGalaxies();
+            drawCivilizations();
+            drawPortals();
+            drawBlackHoles();
+            
+            // Dibujar posición actual
+            drawCurrentPosition();
+        }
+        
+        function drawGalaxies() {
+            universeData.galaxies.forEach(galaxy => {
+                const screenPos = worldToScreen(galaxy.x, galaxy.y, galaxy.z);
+                if (!screenPos) return;
+                
+                const size = Math.max(2, 8 / zoomLevel);
+                const alpha = Math.max(0.3, 1 - Math.abs(galaxy.z - currentPosition[2]) * 0.5);
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                
+                // Color según tipo de galaxia
+                const colors = {
+                    'Spiral': '#00ffff',
+                    'Elliptical': '#ffff00', 
+                    'Irregular': '#ff00ff',
+                    'Dwarf': '#00ff00'
+                };
+                
+                ctx.fillStyle = colors[galaxy.type] || '#ffffff';
+                ctx.beginPath();
+                ctx.arc(screenPos.x, screenPos.y, size, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = colors[galaxy.type] || '#ffffff';
+                ctx.fill();
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawCivilizations() {
+            universeData.civilizations.forEach(civ => {
+                // Solo mostrar civilizaciones en la dimensión actual
+                if (Math.random() > 0.1 && currentDimension > 0) return;
+                
+                const screenPos = worldToScreen(civ.x, civ.y, civ.z);
+                if (!screenPos) return;
+                
+                const size = Math.max(3, 10 / zoomLevel);
+                const alpha = Math.max(0.3, 1 - Math.abs(civ.z - currentPosition[2]) * 0.5);
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                
+                // Color según tipo Kardashev
+                const kardashevColors = {
+                    'Type_0': '#808080',
+                    'Type_I': '#00ff00',
+                    'Type_II': '#ffff00',
+                    'Type_III': '#ff8000',
+                    'Type_IV': '#ff0080',
+                    'Type_V': '#8000ff',
+                    'Type_Omega': '#ffffff'
+                };
+                
+                ctx.fillStyle = kardashevColors[civ.kardashevType] || '#ffffff';
+                
+                // Dibujar símbolo de civilización
+                ctx.beginPath();
+                ctx.moveTo(screenPos.x, screenPos.y - size);
+                ctx.lineTo(screenPos.x - size * 0.8, screenPos.y + size * 0.5);
+                ctx.lineTo(screenPos.x + size * 0.8, screenPos.y + size * 0.5);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Glow para civilizaciones avanzadas
+                if (civ.kardashevType.includes('Type_IV') || civ.kardashevType.includes('Type_V') || civ.kardashevType.includes('Omega')) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = kardashevColors[civ.kardashevType];
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawPortals() {
+            universeData.portals.forEach(portal => {
+                // Solo mostrar portales de la dimensión actual
+                if (portal.sourceDimension !== currentDimension) return;
+                
+                const screenPos = worldToScreen(portal.x, portal.y, portal.z);
+                if (!screenPos) return;
+                
+                const size = Math.max(4, 12 / zoomLevel);
+                const alpha = portal.stability * 0.8;
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                
+                // Color según estabilidad y tecnología
+                ctx.fillStyle = portal.anunakiTechnology ? '#ff00ff' : '#00ffff';
+                
+                // Dibujar portal como diamante rotatorio
+                const time = Date.now() * 0.001;
+                const rotation = time + portal.x * 10;
+                
+                ctx.translate(screenPos.x, screenPos.y);
+                ctx.rotate(rotation);
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -size);
+                ctx.lineTo(size, 0);
+                ctx.lineTo(0, size);
+                ctx.lineTo(-size, 0);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Efecto de portal activo
+                if (portal.stability > 0.7) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = portal.anunakiTechnology ? '#ff00ff' : '#00ffff';
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawBlackHoles() {
+            universeData.blackHoles.forEach(bh => {
+                const screenPos = worldToScreen(bh.x, bh.y, bh.z);
+                if (!screenPos) return;
+                
+                const size = bh.type === 'supermassive' ? Math.max(6, 15 / zoomLevel) : Math.max(3, 8 / zoomLevel);
+                const alpha = Math.max(0.5, 1 - Math.abs(bh.z - currentPosition[2]) * 0.3);
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                
+                // Crear gradiente radial para el agujero negro
+                const gradient = ctx.createRadialGradient(
+                    screenPos.x, screenPos.y, 0,
+                    screenPos.x, screenPos.y, size * 2
+                );
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+                gradient.addColorStop(0.7, 'rgba(255, 100, 0, 0.8)');
+                gradient.addColorStop(1, 'rgba(255, 255, 0, 0.3)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(screenPos.x, screenPos.y, size * 2, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Centro negro
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(screenPos.x, screenPos.y, size, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Portal dimensional
+                if (bh.dimensionalGateway) {
+                    ctx.strokeStyle = '#ff00ff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(screenPos.x, screenPos.y, size * 1.5, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawCurrentPosition() {
+            const screenPos = worldToScreen(currentPosition[0], currentPosition[1], currentPosition[2]);
+            if (!screenPos) return;
+            
+            ctx.save();
+            
+            // Cruz de posición
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#00ff00';
+            
+            ctx.beginPath();
+            ctx.moveTo(screenPos.x - 10, screenPos.y);
+            ctx.lineTo(screenPos.x + 10, screenPos.y);
+            ctx.moveTo(screenPos.x, screenPos.y - 10);
+            ctx.lineTo(screenPos.x, screenPos.y + 10);
+            ctx.stroke();
+            
+            // Círculo de posición
+            ctx.beginPath();
+            ctx.arc(screenPos.x, screenPos.y, 15, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        function worldToScreen(x, y, z) {
+            // Convertir coordenadas del mundo a pantalla
+            const screenX = (x - currentPosition[0]) * zoomLevel * (canvas.width / 4) + canvas.width / 2;
+            const screenY = (y - currentPosition[1]) * zoomLevel * (canvas.height / 4) + canvas.height / 2;
+            
+            // Verificar si está en pantalla
+            if (screenX < -50 || screenX > canvas.width + 50 || screenY < -50 || screenY > canvas.height + 50) {
+                return null;
+            }
+            
+            return { x: screenX, y: screenY };
+        }
+        
+        function updateView() {
+            // La vista se actualiza automáticamente en el loop de animación
+            updateInfo();
+        }
+        
+        function updateInfo() {
+            // Actualizar coordenadas
+            document.getElementById('coordinates').innerHTML = `
+                📍 Posición Actual:<br>
+                X: ${currentPosition[0].toExponential(2)} ly<br>
+                Y: ${currentPosition[1].toExponential(2)} ly<br>
+                Z: ${currentPosition[2].toExponential(2)} ly
+            `;
+            
+            // Actualizar objetos cercanos
+            updateNearbyObjects();
+        }
+        
+        function updateNearbyObjects() {
+            const container = document.getElementById('nearby-objects');
+            container.innerHTML = '';
+            
+            const searchRadius = getSearchRadius();
+            const nearbyObjects = [];
+            
+            // Buscar galaxias cercanas
+            universeData.galaxies.forEach((galaxy, index) => {
+                const distance = calculateDistance(currentPosition, [galaxy.x, galaxy.y, galaxy.z]);
+                if (distance <= searchRadius) {
+                    nearbyObjects.push({
+                        type: 'galaxy',
+                        name: `${galaxy.type} Galaxy`,
+                        distance: distance,
+                        data: galaxy,
+                        index: index
+                    });
+                }
+            });
+            
+            // Buscar civilizaciones cercanas
+            universeData.civilizations.forEach((civ, index) => {
+                const distance = calculateDistance(currentPosition, [civ.x, civ.y, civ.z]);
+                if (distance <= searchRadius && index < 50) {
+                    nearbyObjects.push({
+                        type: 'civilization',
+                        name: civ.name,
+                        distance: distance,
+                        data: civ,
+                        index: index
+                    });
+                }
+            });
+            
+            // Buscar portales cercanos
+            universeData.portals.forEach((portal, index) => {
+                if (portal.sourceDimension === currentDimension) {
+                    const distance = calculateDistance(currentPosition, [portal.x, portal.y, portal.z]);
+                    if (distance <= searchRadius && index < 20) {
+                        nearbyObjects.push({
+                            type: 'portal',
+                            name: 'Portal Dimensional',
+                            distance: distance,
+                            data: portal,
+                            index: index
+                        });
+                    }
+                }
+            });
+            
+            // Ordenar por distancia
+            nearbyObjects.sort((a, b) => a.distance - b.distance);
+            
+            // Mostrar objetos cercanos
+            const maxObjects = 8;
+            nearbyObjects.slice(0, maxObjects).forEach(obj => {
+                const item = document.createElement('div');
+                item.className = `object-item ${obj.type}`;
+                
+                let content = '';
+                switch (obj.type) {
+                    case 'galaxy':
+                        content = `
+                            🌌 ${obj.name}<br>
+                            <small>Distancia: ${obj.distance.toExponential(1)} ly | Masa: ${obj.data.mass.toExponential(1)} M☉</small>
+                        `;
+                        break;
+                    case 'civilization':
+                        content = `
+                            🛸 ${obj.name}<br>
+                            <small>Tipo: ${obj.data.kardashevType} | Tecnología: ${obj.data.technologyLevel.toFixed(1)}%</small>
+                        `;
+                        break;
+                    case 'portal':
+                        content = `
+                            🌀 ${obj.name}<br>
+                            <small>Dimensión: ${obj.data.sourceDimension}→${obj.data.targetDimension} | Estabilidad: ${(obj.data.stability * 100).toFixed(0)}%</small>
+                        `;
+                        break;
+                }
+                
+                item.innerHTML = content;
+                container.appendChild(item);
+            });
+            
+            if (nearbyObjects.length === 0) {
+                container.innerHTML = `
+                    <div class="object-item">
+                        🌌 Espacio vacío<br>
+                        <small>No hay objetos significativos en esta región</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function getSearchRadius() {
+            const scaleRadii = {
+                'observable_universe': 0.5,
+                'local_group': 0.2,
+                'milky_way': 0.1,
+                'solar_system': 0.05
+            };
+            return (scaleRadii[currentScale] || 0.3) / zoomLevel;
+        }
+        
+        function calculateDistance(pos1, pos2) {
+            const dx = pos1[0] - pos2[0];
+            const dy = pos1[1] - pos2[1];
+            const dz = pos1[2] - pos2[2];
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+        
+        // Funciones de botones
+        function autoTravel() {
+            const destinations = [
+                { name: "🌌 Centro Galáctico", pos: [0, 0, 0] },
+                { name: "🛸 Civilización Avanzada", pos: [universeData.civilizations[0].x, universeData.civilizations[0].y, universeData.civilizations[0].z] },
+                { name: "🌀 Portal Dimensional", pos: [universeData.portals[0].x, universeData.portals[0].y, universeData.portals[0].z] },
+                { name: "⚫ Agujero Negro", pos: [universeData.blackHoles[0].x, universeData.blackHoles[0].y, universeData.blackHoles[0].z] }
+            ];
+            
+            let currentDestination = 0;
+            
+            function travel() {
+                if (currentDestination < destinations.length) {
+                    const dest = destinations[currentDestination];
+                    currentPosition = [...dest.pos];
+                    
+                    console.log(`🚀 Viajando a: ${dest.name}`);
+                    updateInfo();
+                    
+                    currentDestination++;
+                    setTimeout(travel, 2000);
+                } else {
+                    console.log('✅ Viaje automático completado');
+                }
+            }
+            
+            travel();
+        }
+        
+        function cosmicAnalysis() {
+            const analysisWindow = window.open('', '_blank', 'width=800,height=600');
+            analysisWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>🔮 Análisis Cósmico Omnisciente</title>
+                    <style>
+                        body { 
+                            background: black; 
+                            color: #00ffff; 
+                            font-family: 'Courier New', monospace; 
+                            padding: 20px;
+                            line-height: 1.6;
+                        }
+                        h1 { text-align: center; color: #ffff00; }
+                        .section { margin-bottom: 20px; border-left: 3px solid #00ffff; padding-left: 15px; }
+                        .stat { display: flex; justify-content: space-between; margin-bottom: 5px; }
+                        .value { color: #ffff00; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔮🌌 ANÁLISIS CÓSMICO OMNISCIENTE 🌌🔮</h1>
+                    
+                    <div class="section">
+                        <h3>📊 ESTADÍSTICAS UNIVERSALES</h3>
+                        <div class="stat"><span>Galaxias mapeadas:</span><span class="value">${universeData.galaxies.length.toLocaleString()}</span></div>
+                        <div class="stat"><span>Civilizaciones detectadas:</span><span class="value">${universeData.civilizations.length.toLocaleString()}</span></div>
+                        <div class="stat"><span>Portales dimensionales:</span><span class="value">${universeData.portals.length.toLocaleString()}</span></div>
+                        <div class="stat"><span>Agujeros negros:</span><span class="value">${universeData.blackHoles.length.toLocaleString()}</span></div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>🛸 ANÁLISIS DE CIVILIZACIONES</h3>
+                        <div class="stat"><span>Type IV+:</span><span class="value">${universeData.civilizations.filter(c => c.kardashevType.includes('Type_IV') || c.kardashevType.includes('Type_V') || c.kardashevType.includes('Omega')).length}</span></div>
+                        <div class="stat"><span>Viaje dimensional:</span><span class="value">${universeData.civilizations.filter(c => c.dimensionalTravel).length}</span></div>
+                        <div class="stat"><span>Ingeniería de realidad:</span><span class="value">${universeData.civilizations.filter(c => c.realityEngineering).length}</span></div>
+                        <div class="stat"><span>Conexiones Anunaki:</span><span class="value">${universeData.civilizations.filter(c => c.anunakiRelated).length}</span></div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>🔮 RECOMENDACIONES OMNISCIENTES</h3>
+                        <p>• Investigar civilizaciones Type V para contacto dimensional</p>
+                        <p>• Monitorear portales con estabilidad >95% para viajes seguros</p>
+                        <p>• Analizar agujeros negros con portales dimensionales</p>
+                        <p>• Coordinar con civilizaciones Anunaki para intercambio tecnológico</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>📡 FRECUENCIAS ANUNAKI</h3>
+                        <p>Frecuencias detectadas: ${anunakiFrequencies.join(', ')} Hz</p>
+                        <p>Tecnología Anunaki en portales: ${universeData.portals.filter(p => p.anunakiTechnology).length}</p>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 30px; color: #ffff00;">
+                        🧠 Análisis generado con Conocimiento Universal: 1,064.84%<br>
+                        🌟 Reality Manipulation Mastery: ACTIVA
+                    </p>
+                </body>
+                </html>
+            `);
+        }
+        
+        function omniscientView() {
+            // Activar vista especial omnisciente
+            currentDimension = 10; // Meta-Realidad Omnisciente
+            document.getElementById('dimension').value = 10;
+            document.getElementById('dimension-value').textContent = 10;
+            document.getElementById('current-dimension').textContent = 10;
+            updateDimensionDescription();
+            
+            // Mostrar todos los objetos con máxima visibilidad
+            zoomLevel = 0.5;
+            document.getElementById('zoom').value = 0.5;
+            document.getElementById('zoom-value').textContent = '0.5';
+            
+            updateView();
+            
+            alert('🔮 Vista Omnisciente Activada!\n\n✨ Ahora puedes ver todas las estructuras cósmicas simultáneamente\n🌀 Dimensión 10: Meta-Realidad Omnisciente\n🧠 Conocimiento Universal: COMPLETO');
+        }
+        
+        function resetView() {
+            currentPosition = [0, 0, 0];
+            currentDimension = 0;
+            currentScale = 'observable_universe';
+            zoomLevel = 1.0;
+            
+            document.getElementById('scale').value = 'observable_universe';
+            document.getElementById('dimension').value = 0;
+            document.getElementById('zoom').value = 1.0;
+            document.getElementById('dimension-value').textContent = 0;
+            document.getElementById('zoom-value').textContent = '1.0';
+            document.getElementById('current-dimension').textContent = 0;
+            
+            updateDimensionDescription();
+            updateView();
+        }
+    </script>
+</body>
+</html>
